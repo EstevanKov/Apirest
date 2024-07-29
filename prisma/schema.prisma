@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//todos los modelos de nuestra APP
+//Un modelo es una entidad que está representada en una tabla de la BD
+
+enum Status{
+  PENDING
+  STARTED
+  PROCESS
+  COMPLETED
+  CANCELED
+}
+
+model Project {
+  id    Int     @default(autoincrement()) @id
+  name String  @db.VarChar(128)
+  description String? @db.VarChar(512)
+  status Status @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime?
+
+  //un proyecto tiene tareas
+  tasks Task[]
+}
+
+
+model Task {
+  id    Int     @default(autoincrement()) @id
+  name String  @db.VarChar(128)
+  description String? @db.VarChar(512)
+  completed Boolean
+
+  //una tarea pertenece a un proyecto a traves de projectId (FK)
+  project Project @relation(fields: [projectId], references: [id])
+  projectId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime?
+}
+
+//ORM: MIGRACIONES migraciones se considera la linea del tiempo de una BD ALGO ASI COMO LOS COMMITS EN GIT
